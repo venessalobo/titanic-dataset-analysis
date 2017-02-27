@@ -1,0 +1,96 @@
+---
+title: "Decision-Tree"
+author: "Venessa"
+date: "February 26, 2017"
+output: html_document
+---
+
+
+```{r}
+#Set Working Directory
+setwd("C:/Users/vanlo/Google Drive/Documents/Projects/Kaggle/Titanic DataSet")
+```
+
+
+```{r}
+#Import DataSets
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+```
+
+
+```{r}
+# Install packages
+install.packages("rattle")
+install.packages("rpart.plot")
+install.packages("RColorBrewer")
+install.packages("readr")
+install.packages("ggplot2")
+install.packages("dplyr")
+```
+
+
+```{r}
+# Load Packages
+library(rattle)
+library(rpart)
+library(rpart.plot)
+library(RColorBrewer)
+library(readr)
+library(ggplot2)
+library(dplyr)
+```
+Decision trees
+```{r}
+# Recreate the gender model
+fit <- rpart(Survived ~ Sex, data = train, method = "class")
+fancyRpartPlot(fit)
+```
+
+```{r}
+# Decision tree taking more variables into consideration
+fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked, 
+             data = train, 
+             method = "class")
+
+fancyRpartPlot(fit)
+```
+
+
+```{r}
+#Prediction and submission file
+prediction <- predict(fit, test, type = "class")
+submit <- data.frame(PassengerID = test$PassengerId, Survived = prediction)
+write.csv(submit, file = "myfirstdtree-1.csv", row.names = FALSE)
+```
+
+Submission obtained a prediction level of 0.78469. Next step is to enhance the decision tree  
+
+```{r}
+# Increasing complexity of decision tree
+fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked,
+             data = train,
+             method = "class",
+             control = rpart.control(minsplit = 2, cp = 0))
+fancyRpartPlot(fit)
+```
+
+```{r}
+#Prediction and submission file
+prediction <- predict(fit, test, type = "class")
+submit <- data.frame(PassengerID = test$PassengerId, Survived = prediction)
+write.csv(submit, file = "myfirstdtree-2.csv", row.names = FALSE)
+```
+
+Submission obtained a prediction level of 0.74163 due to overfitting the model as a result of increased complexity of the decision tree.
+
+```{r}
+# Trim decision tree
+fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked,
+             data=train,
+             method="class",
+             control=rpart.control(minsplit=2, cp=0.005))
+new.fit <- prp(fit,snip=TRUE)$obj
+fancyRpartPlot(new.fit)
+```
+
