@@ -79,7 +79,7 @@
     ## [154] 761 767 769 774 777 779 784 791 793 794 816 826 827 829 833 838 840
     ## [171] 847 850 860 864 869 879 889
 
-Assume the passengers with NA are adults in further analysis.
+    - Assume the passengers with NA are adults in further analysis.
 
     # Analyze the survival rate based on gender of children
     aggregate(Survived ~ Child + Sex, data = train, FUN = sum)
@@ -106,7 +106,7 @@ Assume the passengers with NA are adults in further analysis.
     ## 3     0   male 0.1657033
     ## 4     1   male 0.3965517
 
-Age analysis again indicates a higher survival rate for females.
+    - Age analysis again indicates a higher survival rate for females.
 
     # Group Fares into categories
     train$Fare2 <- '30+'
@@ -134,8 +134,8 @@ Age analysis again indicates a higher survival rate for females.
     ## 15 20-30      3   male 0.1250000
     ## 16   30+      3   male 0.1228070
 
-Anomaly observed with lower survival rate among females in Pclass = 3 &
-Fare &gt; 20
+    - Anomaly observed with lower survival rate among females in Pclass = 3 &
+    Fare &gt; 20
 
     # Update prediction on test data
     test$Survived <- 0
@@ -145,3 +145,5 @@ Fare &gt; 20
     # Submission file
     submit <- data.frame(PassengerID = test$PassengerId, Survived = test$Survived)
     write.csv(submit, file = "Gender-Class-Model.csv", row.names = FALSE)
+
+    Submission obtained a prediction level of 0.77990. Next attempt to improve prediction level using Decision Tree Model.
