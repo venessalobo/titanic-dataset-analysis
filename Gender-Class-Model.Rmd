@@ -1,0 +1,97 @@
+---
+title: "Titanic DataSet Analysis"
+author: "Venessa Lobo"
+date: "February 20, 2017"
+output: md_document
+---
+
+```{r}
+#Set Working Directory
+setwd("C:/Users/vanlo/Google Drive/Documents/Projects/Kaggle/Titanic DataSet")
+```
+
+
+```{r}
+#Import DataSets
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+```
+
+```{r}
+#Analysis of dataframe structure
+str(train)
+```
+
+```{r}
+#Convert Sex to factor
+train$Sex <- as.factor(train$Sex)
+str(train$Sex)
+```
+
+```{r}
+#Understand gender distribution
+summary(train$Sex)
+
+prop.table(table(train$Sex, train$Survived))
+
+# Calculate proportions row-wise (Sex)
+prop.table(table(train$Sex, train$Survived),1)
+
+#Set new column in test dataset to predict survival
+test$Survived <- 0 
+
+#If female passenger, set to 1 i.e. Survived as females where allowed on life boats first
+test$Survived [test$Sex == 'female'] <- 1
+```
+
+```{r}
+#Consider Age variable to identify children
+summary(train$Age)
+train$Child <- 0
+train$Child[train$Age < 18 ] <- 1
+```
+
+```{r}
+# Identify passengers with Age as NA. 
+which (is.na(train$Age))
+```
+Assume the passengers with NA are adults in further analysis.
+
+```{r}
+# Analyze the survival rate based on gender of children
+aggregate(Survived ~ Child + Sex, data = train, FUN = sum)
+aggregate(Survived ~ Child + Sex, data = train, FUN = length)
+aggregate(Survived ~ Child + Sex, data = train, FUN = function(x){sum(x)/length(x)})
+```
+Age analysis again indicates a higher survival rate for females.
+
+```{r}
+# Group Fares into categories
+train$Fare2 <- '30+'
+train$Fare2[train$Fare < 30 & train$Fare >= 20] <- '20-30'
+train$Fare2[train$Fare < 20 & train$Fare >= 10] <- '10-20'
+
+#Analyze survival rate based on Fare, Class and Sex
+aggregate(Survived ~ Fare2 + Pclass + Sex, data = train, FUN=function(x) sum(x)/length(x))
+```
+Anomaly observed with lower survival rate among females in Pclass = 3 & Fare > 20
+
+```{r}
+# Update prediction on test data
+test$Survived <- 0
+test$Survived[test$Sex == 'female'] <- 1
+test$Survived[test$Sex == 'female' & test$Pclass == 3 & test$Fare >=20] <- 0
+
+```
+
+
+```{r}
+# Submission file
+submit <- data.frame(PassengerID = test$PassengerId, Survived = test$Survived)
+write.csv(submit, file = "Gender-Class-Model.csv", row.names = FALSE)
+```
+
+
+
+
+
